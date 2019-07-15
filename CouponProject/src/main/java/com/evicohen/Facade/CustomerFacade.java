@@ -85,7 +85,7 @@ public class CustomerFacade implements CouponClientFacade {
 	 * 
 	 * @throws Exception
 	 */
-	public void purchaseCoupon(Coupon coupon) throws Exception {
+	public Boolean purchaseCoupon(Coupon coupon) throws Exception {
 
 		Set<Coupon> allCoupons = new HashSet<Coupon>();
 		Coupon coupon1 = new Coupon();
@@ -102,7 +102,7 @@ public class CustomerFacade implements CouponClientFacade {
 				Logger.log(Log.info("The Coupon " + coupon.getTitle() + " for customer "
 						+ customerLocaly.getCustomerName() + " is already exist"));
 
-				return;
+				return false;
 			}
 
 		}
@@ -126,7 +126,11 @@ public class CustomerFacade implements CouponClientFacade {
 			JFrame frame = new JFrame("JOptionPane showMessageDialog example");
 			JOptionPane.showMessageDialog(frame, "The Coupon " + coupon.getTitle() + " is not availble");
 			Logger.log(Log.info("The Coupon " + coupon.getTitle() + " is not availble"));
+			
+			return false;
 		}
+		
+		return true; 
 
 	}
 
@@ -140,11 +144,15 @@ public class CustomerFacade implements CouponClientFacade {
 
 		Set<Coupon> allCoupons = new HashSet<Coupon>();
 		allCoupons = customerDBDAO.getCustomerCoupons(customerLocaly);
+		
+		System.out.println(allCoupons);
 
 		if (!(allCoupons.isEmpty())) {
 
 			return allCoupons;
+			
 		} else {
+			
 			JFrame frame = new JFrame("JOptionPane showMessageDialog example");
 			JOptionPane.showMessageDialog(frame, "To Customer," + customerLocaly.getCustomerName() + " hasn't coupons");
 			Logger.log(Log.info("To Customer," + customerLocaly.getCustomerName() + " hasn't coupons"));

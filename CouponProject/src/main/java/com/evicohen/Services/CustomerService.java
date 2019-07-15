@@ -42,29 +42,53 @@ public class CustomerService {
     @Path("purchaseCoupon")
     @Produces(MediaType.APPLICATION_JSON)
     public Response purchaseCoupon(String jsonComString) throws Exception{
-        CustomerFacade customer = getFacade();
+        
+    	
+    	CustomerFacade customer = getFacade();
         Gson gson = new Gson();
         Coupon customerJSON =  gson.fromJson(jsonComString, Coupon.class);
         
-        if (customerJSON != null){
-            customer.purchaseCoupon(customerJSON);
-
-            return Response.ok(200).entity("Purchase coupon" + customerJSON.getTitle()).build();
+        if (customer.purchaseCoupon(customerJSON) && customerJSON != null){
+            
+			String res = "Purchase coupon" + customerJSON.getTitle();
+			String resJson = new Gson().toJson(res);
+			return Response.status(Response.Status.OK).entity(resJson).build();
         }
-        return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Faild to purchase coupon" + customerJSON.getTitle() )
-				.build();
+        
+		String res = "Faild to purchase coupon" + customerJSON.getTitle() ;
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity(resJson).build();
     }
     
 	@GET
 	@Path("getAllPurchaseCoupons")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getAllPurchaseCoupons() throws Exception {
+	public Response getAllPurchaseCoupons() throws Exception {
 
-		CustomerFacade customerFacade = getFacade(); 
-
-		Collection<Coupon> coupons  = customerFacade.getAllPurchasedCoupons(); 
-
-		return new Gson().toJson(coupons);
+		System.out.println("Im here");
+		try {
+			
+			CustomerFacade customerFacade = getFacade(); 
+			Collection<Coupon> coupons  = customerFacade.getAllPurchasedCoupons();
+			
+			System.out.println(coupons);
+			if(coupons != null ) { 
+				
+				String resJson = new Gson().toJson(coupons);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+			}else { 
+				String res = "There are no Customer Coupons";
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+				
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		String res = "There are no Customer Coupons";
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
 	}
 	
 	@GET
