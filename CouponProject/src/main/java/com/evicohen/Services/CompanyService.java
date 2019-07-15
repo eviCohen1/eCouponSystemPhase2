@@ -74,8 +74,11 @@ public class CompanyService {
 
 		CompanyFacade companyFacade = getFacade();
 		Gson gson = new Gson();
+		
 		Coupon couponJason = gson.fromJson(jsonCouponString, Coupon.class);
+		System.out.println(couponJason);
 		Coupon coupon = new Coupon();
+
 		try {
 
 			if (couponJason != null) {
@@ -121,7 +124,11 @@ public class CompanyService {
 				}
 
 				if (couponJason.getActive() != null) {
-					coupon.setActive(couponJason.getActive());
+					if (couponJason.getActive() == true) {
+						coupon.setActive(true);
+					} else
+						coupon.setActive(false);
+
 				} else {
 					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid Active atribute ")
 							.build();
@@ -129,6 +136,7 @@ public class CompanyService {
 
 				coupon.setStartDate(Utils.getDate());
 				coupon.setEndDate(Utils.endDate(30));
+				
 
 			} else
 
@@ -138,69 +146,97 @@ public class CompanyService {
 			}
 
 			if (companyFacade.createCoupon(coupon)) {
-				return Response.ok(200).entity("Created Company" + coupon.getTitle()).build();
-			} else {
-				return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-						.entity("Failed to Create Coupon" + coupon.getTitle()).build();
+				String res  = "Created Company Coupon " + coupon.getTitle(); 
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+                
 			}
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
 
-		return null;
+		return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+				.entity("Failed to Create Coupon" + coupon.getTitle()).build();
 
 	}
 
 	@GET
 	@Path("getAllCompanyCoupons")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getAllCompanyCoupons() throws Exception {
+	public Response getAllCompanyCoupons() throws Exception {
 
 		CompanyFacade companyFacade = getFacade();
-        Company company = companyFacade.getCompany(); 
-		Collection<Coupon> coupons = companyFacade.getCompanyCoupons(company);
 
-		return new Gson().toJson(coupons);
+		try {
+			Company company = companyFacade.getCompany();
+			Collection<Coupon> coupons = companyFacade.getCompanyCoupons(company);
+
+			if (coupons != null) {
+
+				String resJson = new Gson().toJson(coupons);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+			} else {
+				String res = "There are no Company Coupons";
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		String res = "FAILED TO get the Company Coupons";
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+
 	}
 
-	@DELETE
-	@Path("removeCoupon/{CoupId}")
+	@POST
+	@Path("removeCoupon")
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String removeCoupon(@PathParam("CoupId") Long id) throws Exception {
+	public Response removeCoupon(String jsonCouponString) throws Exception {
+
+		Gson gson = new Gson();
+		Coupon couponFromJson = gson.fromJson(jsonCouponString, Coupon.class);
 
 		CompanyFacade companyFacade = getFacade();
-		Coupon coupon = companyFacade.getCoupon(id);
+		Coupon coupon = companyFacade.getCoupon(couponFromJson.getId());
 
 		try {
 
 			if (coupon != null) {
 				companyFacade.removeCoupon(coupon);
-				return "SUCCEED TO REMOVE A COUPON: name = " + coupon.getTitle() + ", id = " + id;
-
+				String res = "SUCCEED TO REMOVE A COUPON: name = " + coupon.getTitle() + ", id = " + coupon.getId();
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.OK).entity(resJson).build();
 			}
 
-			return "FAILED TO REMOVE A COMPANY :  please try again ";
+			String res = "FAILED TO REMOVE A COMPANY :  please try again ";
+			String resJson = new Gson().toJson(res);
+			return Response.status(Response.Status.OK).entity(resJson).build();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return "FAILD TO REMOVE A COMPANY, THE COMPANY :" + coupon.getTitle();
-
+		String res = "FAILD TO REMOVE A COMPANY, THE COMPANY :" + coupon.getTitle();
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.OK).entity(resJson).build();
 	}
 
 	@POST
 	@Path("updateCoupon")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-
 	public Response updateCoupon(String jsonComString) throws Exception {
-
+		
+		
 		CompanyFacade companyFacade = getFacade();
 		Gson gson = new Gson();
+		
 		Coupon couponJason = gson.fromJson(jsonComString, Coupon.class);
-		Coupon coupon = companyFacade.getCoupon(couponJason.getId());
-
+		Coupon coupon = new Coupon();
 		try {
 
 			if (couponJason != null) {
@@ -217,32 +253,32 @@ public class CompanyService {
 							.build();
 				}
 
-				if (couponJason.getMessage() != null && couponJason.getMessage() != "") {
-					coupon.setMessage(couponJason.getMessage());
-				} else {
-					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon message")
-							.build();
-				}
-				if (couponJason.getPrice() > 0) {
-					coupon.setPrice(couponJason.getPrice());
-				} else {
-					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon price")
-							.build();
-				}
-
-				if (couponJason.getImage() != null && couponJason.getImage() != "") {
-					coupon.setImage(couponJason.getImage());
-				} else {
-					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Image")
-							.build();
-				}
-
-				if (couponJason.getType() != null) {
-					coupon.setType(couponJason.getType());
-				} else {
-					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Type")
-							.build();
-				}
+//				if (couponJason.getMessage() != null && couponJason.getMessage() != "") {
+//					coupon.setMessage(couponJason.getMessage());
+//				} else {
+//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon message")
+//							.build();
+//				}
+//				if (couponJason.getPrice() > 0) {
+//					coupon.setPrice(couponJason.getPrice());
+//				} else {
+//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon price")
+//							.build();
+//				}
+//
+//				if (couponJason.getImage() != null && couponJason.getImage() != "") {
+//					coupon.setImage(couponJason.getImage());
+//				} else {
+//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Image")
+//							.build();
+//				}
+//
+//				if (couponJason.getType() != null) {
+//					coupon.setType(couponJason.getType());
+//				} else {
+//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Type")
+//							.build();
+//				}
 
 				if (couponJason.getActive() != null) {
 					coupon.setActive(couponJason.getActive());
@@ -253,19 +289,21 @@ public class CompanyService {
 
 			}
 			
-			if (coupon != null ) {
+			coupon.setStartDate(Utils.getDate());
+			coupon.setEndDate(Utils.endDate(30));
+			
+			if (coupon != null) {
 				companyFacade.updateCoupon(coupon);
-				System.out.println(coupon);
-				return Response.ok(200).entity("Update coupon" + coupon.getTitle()).build();
-			} 
-
+				String res = "Update coupon" + coupon.getTitle();
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Faild to remove the coupon")
-				.build();
+		return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Faild to remove the coupon").build();
 
 	}
 

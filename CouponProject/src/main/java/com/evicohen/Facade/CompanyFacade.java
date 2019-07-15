@@ -81,28 +81,28 @@ public class CompanyFacade implements CouponClientFacade {
 	public Boolean createCoupon(Coupon coupon) throws Exception{ 
 		
 		Set<Coupon> allCoupons = new HashSet<Coupon>() ; 
-		allCoupons = getAllCoupons(); 
-	
-		Iterator<Coupon> itr = allCoupons.iterator(); 
-		 
-		while(itr.hasNext())
-		{ 
-			
-			Coupon coupon2 = new Coupon(); 
-			coupon2 = (Coupon) itr.next(); 
-			if (coupon2 instanceof Coupon && coupon2.getTitle().equals(coupon.getTitle())) { 
-				JFrame frame = new JFrame("JOptionPane showMessageDialog example");
-				JOptionPane.showMessageDialog(frame, "Coupon " + coupon.getTitle() + " Already Exist");
-				Logger.log(Log.info("Coupon " + coupon.getTitle() + " Already Exist"));
-				return false;		
+		allCoupons = getCompanyCoupons(company); 
+	    
+		if(allCoupons != null ) { 
+			Iterator<Coupon> itr = allCoupons.iterator();
+			while(itr.hasNext())
+			{ 
+				
+				Coupon coupon2 = new Coupon(); 
+				coupon2 = (Coupon) itr.next(); 
+				
+				if (coupon2 instanceof Coupon && coupon2.getTitle().equals(coupon.getTitle())) { 
+					JFrame frame = new JFrame("JOptionPane showMessageDialog example");
+					JOptionPane.showMessageDialog(frame, "Coupon " + coupon.getTitle() + " Already Exist");
+					Logger.log(Log.info("Coupon " + coupon.getTitle() + " Already Exist"));
+					return false;		
+				}
 			}
 		}
-		System.out.println(company);
-		System.out.println(coupon);
+		 
 		
 		couponDBDAO.createCoupon(coupon, company);	
 		Logger.log(Log.info("Created coupon " + coupon.getTitle() + " successfully"));
-		System.out.println("Created Coupon");
 		return true ; 
 	}
 	
@@ -184,7 +184,7 @@ public class CompanyFacade implements CouponClientFacade {
 	public Set<Coupon> getCompanyCoupons(Company company) throws Exception { 
 		
 		Set<Coupon> allCoupons = new HashSet<Coupon>() ; 
-		allCoupons =companyDBDAO.getCompanyCoupons(company);
+ 		allCoupons =companyDBDAO.getCompanyCoupons(company);
 		
 				if(!(allCoupons.isEmpty())) {
 					
@@ -192,8 +192,6 @@ public class CompanyFacade implements CouponClientFacade {
 				}
 				else 
 				{ 
-					JFrame frame = new JFrame("JOptionPane showMessageDialog example");
-					JOptionPane.showMessageDialog(frame, "To a comapny, " + company.getCompName() + " hasn't coupons");
 					Logger.log(Log.info("To a comapny, " + company.getCompName() + " hasn't coupons"));
 					return null;
 				}

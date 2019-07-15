@@ -262,7 +262,7 @@ public class CouponDBDAO implements CouponDAO {
 					pstms.setDate(2, (Date) coupon.getEndDate());
 					pstms.setInt(3,coupon.getAmount());
 					pstms.setBoolean(4,coupon.getActive());
-					pstms.setLong(5, coupon2.getId());				
+					pstms.setLong(5, coupon2.getId());	
 					pstms.executeUpdate();
 				}
 			}
