@@ -4,7 +4,7 @@ public class User {
 	
 	private String userName ; 
 	private String password ; 
-	private String clientType ;
+	private String clientType;
 	
 	
 	public String getUserName() {

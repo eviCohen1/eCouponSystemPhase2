@@ -65,13 +65,11 @@ public class CustomerService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAllPurchaseCoupons() throws Exception {
 
-		System.out.println("Im here");
 		try {
 			
 			CustomerFacade customerFacade = getFacade(); 
 			Collection<Coupon> coupons  = customerFacade.getAllPurchasedCoupons();
 			
-			System.out.println(coupons);
 			if(coupons != null ) { 
 				
 				String resJson = new Gson().toJson(coupons);

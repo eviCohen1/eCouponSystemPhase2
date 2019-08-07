@@ -145,7 +145,6 @@ public class CustomerFacade implements CouponClientFacade {
 		Set<Coupon> allCoupons = new HashSet<Coupon>();
 		allCoupons = customerDBDAO.getCustomerCoupons(customerLocaly);
 		
-		System.out.println(allCoupons);
 
 		if (!(allCoupons.isEmpty())) {
 
