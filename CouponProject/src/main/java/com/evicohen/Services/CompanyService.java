@@ -1,8 +1,7 @@
 package com.evicohen.Services;
-
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,10 +16,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.evicohen.BusinessDelegate.BusinessDelegate;
 import com.evicohen.Facade.AdminFacade;
 import com.evicohen.Facade.CompanyFacade;
 import com.evicohen.JavaBeans.Company;
 import com.evicohen.JavaBeans.Coupon;
+import com.evicohen.JavaBeans.Income;
+import com.evicohen.JavaBeans.IncomeType;
 import com.evicohen.Main.CouponSystem;
 import com.evicohen.Main.CouponSystem.clientType;
 import com.evicohen.Main.Utils;
@@ -33,7 +35,10 @@ public class CompanyService {
 	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
-
+	
+	private BusinessDelegate businessDelegate = new BusinessDelegate() ; 
+	Date date = new Date();
+	Gson gson = new Gson();	
 	private CompanyFacade getFacade() throws Exception {
 
 		CompanyFacade company = null;
@@ -73,7 +78,7 @@ public class CompanyService {
 	public Response createCoupon(String jsonCouponString) throws Exception {
 
 		CompanyFacade companyFacade = getFacade();
-		Gson gson = new Gson();
+		
 		
 		Coupon couponJason = gson.fromJson(jsonCouponString, Coupon.class);
 		System.out.println(couponJason);
@@ -146,6 +151,19 @@ public class CompanyService {
 			}
 
 			if (companyFacade.createCoupon(coupon)) {
+				
+		        //Update the Income of the e-Coupon system, use Proxy BusinessDelegate//  
+		            	
+		        	try {
+		        		
+		                Income income = new Income(0, companyFacade.getCompany().getCompName(),date.toString(),IncomeType.COMPANY_NEW_COUPON, 100); 
+		              	System.out.println(businessDelegate.storeIncome(income)); 
+						
+					} catch (Exception e) {
+						e.getMessage();
+					}
+		        	
+		        	
 				String res  = "Created Company Coupon " + coupon.getTitle(); 
 				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
@@ -198,7 +216,6 @@ public class CompanyService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response removeCoupon(String jsonCouponString) throws Exception {
 
-		Gson gson = new Gson();
 		Coupon couponFromJson = gson.fromJson(jsonCouponString, Coupon.class);
 
 		CompanyFacade companyFacade = getFacade();
@@ -233,7 +250,6 @@ public class CompanyService {
 		
 		
 		CompanyFacade companyFacade = getFacade();
-		Gson gson = new Gson();
 		
 		Coupon couponJason = gson.fromJson(jsonComString, Coupon.class);
 		Coupon coupon = new Coupon();
@@ -253,33 +269,6 @@ public class CompanyService {
 							.build();
 				}
 
-//				if (couponJason.getMessage() != null && couponJason.getMessage() != "") {
-//					coupon.setMessage(couponJason.getMessage());
-//				} else {
-//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon message")
-//							.build();
-//				}
-//				if (couponJason.getPrice() > 0) {
-//					coupon.setPrice(couponJason.getPrice());
-//				} else {
-//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon price")
-//							.build();
-//				}
-//
-//				if (couponJason.getImage() != null && couponJason.getImage() != "") {
-//					coupon.setImage(couponJason.getImage());
-//				} else {
-//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Image")
-//							.build();
-//				}
-//
-//				if (couponJason.getType() != null) {
-//					coupon.setType(couponJason.getType());
-//				} else {
-//					return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Invalid coupon Type")
-//							.build();
-//				}
-
 				if (couponJason.getActive() != null) {
 					coupon.setActive(couponJason.getActive());
 				} else {
@@ -293,6 +282,16 @@ public class CompanyService {
 			coupon.setEndDate(Utils.endDate(30));
 			
 			if (coupon != null) {
+				
+		        //Update the Income of the e-Coupon system, use Proxy BusinessDelegate//  
+	        	try {
+	        		
+	                Income income = new Income(0, companyFacade.getCompany().getCompName(),date.toString(),IncomeType.COMPANY_UPDATE_COUPON, 10); 
+	              	System.out.println(businessDelegate.storeIncome(income)); 
+					
+				} catch (Exception e) {
+					e.getMessage();
+				}
 				companyFacade.updateCoupon(coupon);
 				String res = "Update coupon" + coupon.getTitle();
 				String resJson = new Gson().toJson(res);

@@ -17,6 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.evicohen.BusinessDelegate.BusinessDelegate;
 import com.evicohen.Exceptions.CreateException;
 import com.evicohen.Exceptions.DBException;
 import com.evicohen.Facade.AdminFacade;
@@ -35,6 +36,8 @@ public class AdminService {
 	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
+	
+	private BusinessDelegate businessDelegate = new BusinessDelegate() ; 
 
 	private AdminFacade getFacade() {
 

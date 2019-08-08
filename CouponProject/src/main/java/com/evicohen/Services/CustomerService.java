@@ -1,6 +1,7 @@
 package com.evicohen.Services;
 
 import java.util.Collection;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,12 +14,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.derby.tools.sysinfo;
+
+import com.evicohen.BusinessDelegate.BusinessDelegate;
 import com.evicohen.Facade.CompanyFacade;
 import com.evicohen.Facade.CustomerFacade;
 import com.evicohen.JavaBeans.Company;
 import com.evicohen.JavaBeans.Coupon;
 import com.evicohen.JavaBeans.CouponType;
 import com.evicohen.JavaBeans.Customer;
+import com.evicohen.JavaBeans.Income;
+import com.evicohen.JavaBeans.IncomeType;
 import com.google.gson.Gson;
 
 @Path("customer") 
@@ -28,6 +34,8 @@ public class CustomerService {
 	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
+	
+	private BusinessDelegate businessDelegate = new BusinessDelegate() ; 
 
 	private CustomerFacade getFacade () throws Exception { 
 		
@@ -48,9 +56,22 @@ public class CustomerService {
         Gson gson = new Gson();
         Coupon customerJSON =  gson.fromJson(jsonComString, Coupon.class);
         
+        Date date = new Date();
+        
+        //Update the Income of the e-Coupon system, use Proxy BusinessDelegate//  
         if (customer.purchaseCoupon(customerJSON) && customerJSON != null){
             
-			String res = "Purchase coupon" + customerJSON.getTitle();
+        	
+        	try {
+        		
+                Income income = new Income(0, customer.getCustmer().getCustomerName(),date.toString(),IncomeType.CUSTOMER_PURCHASE, customerJSON.getAmount()); 
+              	System.out.println(businessDelegate.storeIncome(income)); 
+				
+			} catch (Exception e) {
+				e.getMessage();
+			}
+        		
+   		    String res = "Purchase coupon" + customerJSON.getTitle();
 			String resJson = new Gson().toJson(res);
 			return Response.status(Response.Status.OK).entity(resJson).build();
         }
