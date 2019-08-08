@@ -49,12 +49,11 @@ public class BusinessDelegate {
 		String  viewIncomeByCompany_Url = "http://localhost:8081/income/ViewIncomesByCompany" ;
 		
 		 List<Income> Incomes =
-		            client.target(viewIncomeByCompany_Url)
-		            .path("all")
-		            .request(MediaType.APPLICATION_XML)
+		            client.target(viewIncomeByCompany_Url).
+		            path(companyName)
+		            .request(MediaType.APPLICATION_JSON_TYPE)
 		            .get(new GenericType<List<Income>>() {
 		            });
-		
 		
 		return Incomes; 
 	}
@@ -79,8 +78,8 @@ public class BusinessDelegate {
 		
 		 List<Income> Incomes =
 		            client.target(viewIncomeByCustomer_Url)
-		            .path("all")
-		            .request(MediaType.APPLICATION_XML)
+		            .path(customerName)
+		            .request(MediaType.APPLICATION_JSON_TYPE)
 		            .get(new GenericType<List<Income>>() {
 		            });
 		

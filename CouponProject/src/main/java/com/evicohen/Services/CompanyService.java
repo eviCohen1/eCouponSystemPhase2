@@ -2,6 +2,7 @@ package com.evicohen.Services;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -208,6 +209,41 @@ public class CompanyService {
 		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
 
+	}
+	
+	@GET
+	@Path("viewIncomeByCompeny")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response viewIncomeByCompeny() throws Exception  { 
+		
+		CompanyFacade companyFacade = getFacade();
+		
+		try {
+			Company company = companyFacade.getCompany();
+			
+			List<Income> income = businessDelegate.viewIncomeByCompany(company.getCompName());
+			
+			System.out.println(income);
+			
+			if(income != null ) { 
+				String resJson = new Gson().toJson(income); 
+				return Response.status(Response.Status.OK).entity(resJson).build(); 
+			}else { 
+				String res = "There are no Company OutCome";
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+				
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
+		String res = "FAILED TO get the Company OutCome";
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+		
 	}
 
 	@POST
