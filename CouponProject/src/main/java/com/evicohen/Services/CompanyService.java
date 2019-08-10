@@ -223,8 +223,6 @@ public class CompanyService {
 			
 			List<Income> income = businessDelegate.viewIncomeByCompany(company.getCompName());
 			
-			System.out.println(income);
-			
 			if(income != null ) { 
 				String resJson = new Gson().toJson(income); 
 				return Response.status(Response.Status.OK).entity(resJson).build(); 
@@ -320,14 +318,11 @@ public class CompanyService {
 			if (coupon != null) {
 				
 		        //Update the Income of the e-Coupon system, use Proxy BusinessDelegate//  
-	        	try {
+	
 	        		
-	                Income income = new Income(0, companyFacade.getCompany().getCompName(),date.toString(),IncomeType.COMPANY_UPDATE_COUPON, 10); 
-	              	System.out.println(businessDelegate.storeIncome(income)); 
+	            Income income = new Income(0, companyFacade.getCompany().getCompName(),date.toString(),IncomeType.COMPANY_UPDATE_COUPON, 10); 
+	            System.out.println(businessDelegate.storeIncome(income)); 
 					
-				} catch (Exception e) {
-					e.getMessage();
-				}
 				companyFacade.updateCoupon(coupon);
 				String res = "Update coupon" + coupon.getTitle();
 				String resJson = new Gson().toJson(res);

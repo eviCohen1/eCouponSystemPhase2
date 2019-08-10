@@ -27,35 +27,35 @@ public class CouponDBDAO implements CouponDAO {
 	 * This class implements basic methods between the application level to the DB
 	 * such as C.R.U.D. the logic of the program doesn't implement in this level.
 	 * this level is the only connection to the SQL database,this level uses a
-	 * connection pool as a data access pattern Used prepared statements to prevent SQL injection 
-	 * It contains : 
-	 * removeCoupon
-	 * removeCustomerCoupon
-	 * removeCompanyCoupon
-	 * updateCoupon
-	 * getCoupon
-	 * getCouponByTitle
-	 * getAllCoupouns
-	 * getCouponByType
-	 * createCoupon (create coupon and update join table Company_Coupon)
-	 * createCoupon
+	 * connection pool as a data access pattern Used prepared statements to prevent
+	 * SQL injection It contains : removeCoupon removeCustomerCoupon
+	 * removeCompanyCoupon updateCoupon getCoupon getCouponByTitle getAllCoupouns
+	 * getCouponByType createCoupon (create coupon and update join table
+	 * Company_Coupon) createCoupon
+	 * 
 	 * @throws DBException
 	 */
 
-	/****************************************** Attributes *********************************************/
+	/******************************************
+	 * Attributes
+	 *********************************************/
 
 	private Connection conn;
 	private Coupon couponLocal;
 	private long id;
 
-	/********************************************* CTOR************************************************/
+	/*********************************************
+	 * CTOR
+	 ************************************************/
 	public CouponDBDAO() {
 		// TODO Auto-generated constructor stub
 	}
 
-	/********************************************* Methods *********************************************/
-	/* Remove Company 
-	 * This method remove a company from company table 
+	/*********************************************
+	 * Methods
+	 *********************************************/
+	/*
+	 * Remove Company This method remove a company from company table
 	 */
 	@Override
 	public void removeCoupon(Coupon coupon) throws Exception {
@@ -64,9 +64,9 @@ public class CouponDBDAO implements CouponDAO {
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -109,12 +109,13 @@ public class CouponDBDAO implements CouponDAO {
 			}
 
 		}
-		
+
 		Logger.log(Log.info("coupon " + coupon.getTitle() + " successfully Removed from the DB"));
 	}
 
-	/* Remove Customer Coupon
-	 * This method remove coupon from join table, Customer_Coupon
+	/*
+	 * Remove Customer Coupon This method remove coupon from join table,
+	 * Customer_Coupon
 	 */
 	public void removeCustomerCoupon(Coupon coupon) throws Exception {
 
@@ -122,9 +123,9 @@ public class CouponDBDAO implements CouponDAO {
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -143,8 +144,9 @@ public class CouponDBDAO implements CouponDAO {
 					pstmt.setLong(1, id);
 					pstmt.executeUpdate();
 					conn.commit();
-					
-					Logger.log(Log.info("coupon " + coupon2.getTitle() + " successfully Removed from Customer_Coupon table"));
+
+					Logger.log(Log
+							.info("coupon " + coupon2.getTitle() + " successfully Removed from Customer_Coupon table"));
 					break;
 				}
 			}
@@ -173,18 +175,19 @@ public class CouponDBDAO implements CouponDAO {
 		}
 	}
 
-	/* Remove Company Coupons 
-	 * This method remove coupon from join table, Company_Coupon
+	/*
+	 * Remove Company Coupons This method remove coupon from join table,
+	 * Company_Coupon
 	 */
-	public void removeCompanyCoupon(Coupon coupon) throws Exception  {
+	public void removeCompanyCoupon(Coupon coupon) throws Exception {
 
 		Set<Coupon> allCoupons = new HashSet<Coupon>();
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -203,8 +206,9 @@ public class CouponDBDAO implements CouponDAO {
 					pstmt.setLong(1, coupon2.getId());
 					pstmt.executeUpdate();
 					conn.commit();
-			
-					Logger.log(Log.info("coupon " + coupon2.getTitle() + " successfully Removed from Company_Coupon table"));
+
+					Logger.log(Log
+							.info("coupon " + coupon2.getTitle() + " successfully Removed from Company_Coupon table"));
 				}
 			}
 
@@ -233,37 +237,40 @@ public class CouponDBDAO implements CouponDAO {
 
 	}
 
-	/* Update Coupon
-	 * This method update coupon attributes ( Start date, End Date, Amount , Active ) 
+	/*
+	 * Update Coupon This method update coupon attributes ( Start date, End Date,
+	 * Amount , Active )
 	 */
 	@Override
-	public void updateCoupon(Coupon coupon) throws Exception{
+	public void updateCoupon(Coupon coupon) throws Exception {
 
 		Set<Coupon> allCoupons = new HashSet<Coupon>();
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
 
-		// Open a connection from the connection pool class 
-		conn =ConnPool.getInstance().getConnection();
+		// Open a connection from the connection pool class
+		conn = ConnPool.getInstance().getConnection();
 		// create the Execute query
 		PreparedStatement pstms = null;
 		String sqlString = "UPDATE COUPON SET START_DATE = ?, END_DATE = ? , AMOUNT = ? , ACTIVE = ? WHERE ID = ? ";
-
 		try {
 			// create PreparedStatement and build the SQL query
+
 			while (itr.hasNext()) {
 
 				Coupon coupon2 = new Coupon();
 				coupon2 = itr.next();
-				
-				if (coupon2.getTitle().equals(coupon.getTitle())) {
+
+				if (coupon.getTitle().equalsIgnoreCase(coupon2.getTitle())) {
+
 					pstms = conn.prepareStatement(sqlString);
 					pstms.setDate(1, (Date) coupon.getStartDate());
 					pstms.setDate(2, (Date) coupon.getEndDate());
-					pstms.setInt(3,coupon.getAmount());
-					pstms.setBoolean(4,coupon.getActive());
-					pstms.setLong(5, coupon2.getId());	
+					pstms.setInt(3, coupon.getAmount());
+					pstms.setBoolean(4, coupon.getActive());
+					pstms.setLong(5, coupon2.getId());
 					pstms.executeUpdate();
+
 				}
 			}
 		} catch (SQLException e) {
@@ -289,16 +296,16 @@ public class CouponDBDAO implements CouponDAO {
 
 	}
 
-	/* Get Coupon 
-	 * This method returns Coupon object by id 
+	/*
+	 * Get Coupon This method returns Coupon object by id
 	 */
 	@Override
 	public Coupon getCoupon(long id) throws Exception {
-		
+
 		Coupon coupon = new Coupon();
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -347,79 +354,81 @@ public class CouponDBDAO implements CouponDAO {
 		Logger.log(Log.info("Get Coupon " + coupon.getTitle() + " seccssufully "));
 		return coupon;
 	}
-	
-    /* Update Coupon Expiration 
-     *  This method check the coupon expiration and update the Active column ( boolean ) 
-     */
-    public void  updateCouponsExpiration() throws Exception { 
-		
-		Coupon coupon = new Coupon(); 
-		Set<Coupon> allCoupons = new HashSet<Coupon>(); 
-		
+
+	/*
+	 * Update Coupon Expiration This method check the coupon expiration and update
+	 * the Active column ( boolean )
+	 */
+	public void updateCouponsExpiration() throws Exception {
+
+		Coupon coupon = new Coupon();
+		Set<Coupon> allCoupons = new HashSet<Coupon>();
+
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
-		
+
 		while (itr.hasNext()) {
 			coupon = itr.next();
-			
-			//Check if the coupon is expired and update the Active value 
-			if(coupon.getStartDate().compareTo(coupon.getEndDate())>0  || coupon.getAmount() == 0 && coupon.getActive()) {
+
+			// Check if the coupon is expired and update the Active value
+			if (coupon.getStartDate().compareTo(coupon.getEndDate()) > 0
+					|| coupon.getAmount() == 0 && coupon.getActive()) {
 				coupon.setActive(false);
 				updateCoupon(coupon);
 				Logger.log(Log.info("The Coupon " + coupon.getTitle() + " is Expired and updated coupon details "));
 			}
-			
-			//Check if the coupon is valid and update the Active value 
-			if ( coupon.getStartDate().compareTo(coupon.getEndDate())<0 && !coupon.getActive() && coupon.getAmount()>0) {	
+
+			// Check if the coupon is valid and update the Active value
+			if (coupon.getStartDate().compareTo(coupon.getEndDate()) < 0 && !coupon.getActive()
+					&& coupon.getAmount() > 0) {
 				coupon.setActive(true);
 				updateCoupon(coupon);
 				Logger.log(Log.info("The Coupon " + coupon.getTitle() + " is Valide and updated coupon details"));
-				
+
 			}
-			
+
 		}
 
 	}
 
-	/* Get Coupon By Title  
-	 * This method return a coupon object by coupon title 
+	/*
+	 * Get Coupon By Title This method return a coupon object by coupon title
 	 */
-	public Coupon getCouponByTitle(String couponTitle) throws Exception { 
-		
-		Coupon coupon = new Coupon(); 
-		Set<Coupon> allCoupons = new HashSet<Coupon>(); 
-		
+	public Coupon getCouponByTitle(String couponTitle) throws Exception {
+
+		Coupon coupon = new Coupon();
+		Set<Coupon> allCoupons = new HashSet<Coupon>();
+
 		allCoupons = getAllCoupouns();
 		Iterator<Coupon> itr = allCoupons.iterator();
-		
 
 		while (itr.hasNext()) {
 			coupon = itr.next();
 			if (coupon.getTitle().equals(couponTitle)) {
 				Logger.log(Log.info("The Coupon " + coupon.getTitle() + " is exist"));
-				return coupon; 
+				return coupon;
 			}
-			
+
 		}
 		JFrame frame = new JFrame("JOptionPane showMessageDialog example");
 		JOptionPane.showMessageDialog(frame, "The Coupon " + coupon.getTitle() + " is not exist");
 		Logger.log(Log.info("The Coupon " + coupon.getTitle() + " is not exist"));
-		return null; 
-		
-		
+		return null;
+
 	}
-	
-	/* Get all Coupons 
-	 * This method return Set collection of coupon type, contain all the coupons
+
+	/*
+	 * Get all Coupons This method return Set collection of coupon type, contain all
+	 * the coupons
 	 */
 	@Override
 	public synchronized Set<Coupon> getAllCoupouns() throws Exception {
 
 		Set<Coupon> coupons = new HashSet<Coupon>();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -472,16 +481,16 @@ public class CouponDBDAO implements CouponDAO {
 		return coupons;
 	}
 
-	/* Print All coupons 
-	 * This method print all the coupons 
+	/*
+	 * Print All coupons This method print all the coupons
 	 */
 	public void printAllCoupons() throws Exception {
 
 		Coupon coupon = new Coupon();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -531,21 +540,22 @@ public class CouponDBDAO implements CouponDAO {
 			}
 
 		}
-		
+
 		Logger.log(Log.info("Print all Coupons successfully"));
 	}
 
-	/* Get coupon By type 
-	 * This method return Set Collection of Coupon type, contain all the coupons with the same type
+	/*
+	 * Get coupon By type This method return Set Collection of Coupon type, contain
+	 * all the coupons with the same type
 	 */
 	@Override
 	public synchronized Set<Coupon> getCouponByType(Coupon coupon) throws Exception {
 
 		Set<Coupon> coupons = new HashSet<Coupon>();
 
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -606,18 +616,18 @@ public class CouponDBDAO implements CouponDAO {
 		return coupons;
 	}
 
-	/* Create Coupon
-	 * This method create coupon and update the join table Company_Coupon
+	/*
+	 * Create Coupon This method create coupon and update the join table
+	 * Company_Coupon
 	 */
-	public void createCoupon(Coupon coupon, Company company) throws Exception,SQLException{
+	public void createCoupon(Coupon coupon, Company company) throws Exception, SQLException {
 
-		long companyID = company.getId() ;
-		long couponID= 0;
+		long companyID = company.getId();
+		long couponID = 0;
 
-		
-		// Open a connection from the connection pool class 
+		// Open a connection from the connection pool class
 		try {
-			conn =ConnPool.getInstance().getConnection();
+			conn = ConnPool.getInstance().getConnection();
 		} catch (Exception e) {
 			throw new DBException("The Connection is faild");
 		}
@@ -639,8 +649,8 @@ public class CouponDBDAO implements CouponDAO {
 			pstmt.setString(6, coupon.getMessage());
 			pstmt.setDouble(7, coupon.getPrice());
 			pstmt.setString(8, coupon.getImage());
-			pstmt.setBoolean(9,coupon.getActive());
-			// Execute the query and update	
+			pstmt.setBoolean(9, coupon.getActive());
+			// Execute the query and update
 			pstmt.executeUpdate();
 			// Insert the new coupon to join table COMPANY_COUPON
 			stmt = conn.createStatement();
@@ -653,7 +663,6 @@ public class CouponDBDAO implements CouponDAO {
 			pstmt2.setLong(1, companyID);
 			pstmt2.setLong(2, couponID);
 			pstmt2.executeUpdate();
-			
 
 		} catch (SQLException e) {
 			// Handle errors for JDBC
@@ -675,12 +684,7 @@ public class CouponDBDAO implements CouponDAO {
 
 		}
 
-		Logger.log(Log.info("Insert coupon " + coupon.getTitle()+ " successfully !!!!"));
+		Logger.log(Log.info("Insert coupon " + coupon.getTitle() + " successfully !!!!"));
 	}
 
-
-
-
-
-	
 }

@@ -79,7 +79,6 @@ public class LoginService {
 						AdminFacade adminFacade2 = (AdminFacade) CouponSystem.getCouponSystem().login(userName,
 								pass, type);
 						session.setAttribute("adminFacade", adminFacade2);
-						System.out.println(ServerResponse );
 						return Response.status(Response.Status.OK).entity(ServerResponse).build();
 					} 
 					break ; 
@@ -91,7 +90,6 @@ public class LoginService {
 						CompanyFacade companyFacade1 = (CompanyFacade) CouponSystem.getCouponSystem().login(userName,
 								pass, type);
 						session.setAttribute("companyFacade", companyFacade1);
-						System.out.println(ServerResponse );
 						return Response.status(Response.Status.OK).entity(ServerResponse ).build();
 					}
 
@@ -103,7 +101,6 @@ public class LoginService {
 						CustomerFacade customerFacade1 = (CustomerFacade) CouponSystem.getCouponSystem().login(userName,
 								pass, type);
 						session.setAttribute("customerFacade", customerFacade1);
-						System.out.println(ServerResponse );
 						return Response.status(Response.Status.OK).entity(ServerResponse).build();
 					}
 

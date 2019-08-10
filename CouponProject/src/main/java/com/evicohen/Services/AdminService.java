@@ -1,7 +1,8 @@
 package com.evicohen.Services;
 
-
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,37 +22,36 @@ import com.evicohen.BusinessDelegate.BusinessDelegate;
 import com.evicohen.Exceptions.CreateException;
 import com.evicohen.Exceptions.DBException;
 import com.evicohen.Facade.AdminFacade;
+import com.evicohen.Facade.CompanyFacade;
 import com.evicohen.JavaBeans.Company;
 import com.evicohen.JavaBeans.Customer;
+import com.evicohen.JavaBeans.Income;
 import com.evicohen.Main.CouponSystem;
 import com.evicohen.Main.CouponSystem.clientType;
 import com.google.gson.Gson;
 
-
 @Path("admin")
 public class AdminService {
-
 
 	@Context
 	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
-	
-	private BusinessDelegate businessDelegate = new BusinessDelegate() ; 
+
+	private BusinessDelegate businessDelegate = new BusinessDelegate();
 
 	private AdminFacade getFacade() {
 
 		AdminFacade admin = null;
 		admin = (AdminFacade) request.getSession(false).getAttribute("adminFacade");
-		if(admin == null) { 
+		if (admin == null) {
 			System.out.println("I'm here");
 		}
 		System.out.println(admin);
 		return admin;
 
 	}
-	
-	
+
 //	private AdminFacade getFacade() throws Exception {
 //
 //		AdminFacade admin = null;
@@ -60,97 +60,70 @@ public class AdminService {
 //		return admin;
 //
 //	}
-	
+
 	@Path("getAllCompanies")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllCompnies () throws Exception {
-		
+	public Response getAllCompnies() throws Exception {
+
 		AdminFacade admin = getFacade();
 		try {
-			Collection<Company> companies = admin.getAllCompanies(); 		
+			Collection<Company> companies = admin.getAllCompanies();
 
-            String resJson = new Gson().toJson(companies);
+			String resJson = new Gson().toJson(companies);
 			return Response.status(Response.Status.OK).entity(resJson).build();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
 		String res = "FAILED TO get the Companies";
-        String resJson = new Gson().toJson(res);
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
 
-	
-		
 	}
-	
-	@GET 
-	@Path ("getCompany/{companyName}")
+
+	@GET
+	@Path("getCompany/{companyName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCompany (@PathParam("companyName") String companyName) throws Exception { 
-		
-		AdminFacade admin = getFacade() ; 
-		
-		try { 
-			
+	public Response getCompany(@PathParam("companyName") String companyName) throws Exception {
+
+		AdminFacade admin = getFacade();
+
+		try {
+
 			Company company = admin.getCompany(companyName);
-			if ( company != null) { 
+			if (company != null) {
 				String resJson = new Gson().toJson(company);
 				return Response.status(Response.Status.OK).entity(resJson).build();
 			}
-			
-			
-		}catch ( Exception e ) { 
-			
+
+		} catch (Exception e) {
+
 		}
-		
+
 		String res = "FAILED TO get the Company with company ID" + companyName;
-        String resJson = new Gson().toJson(res);
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-		
+
 	}
-	
-//	@POST 
-//	@Path("CreateCompany")
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response createComapny ( String jsonComString) throws Exception { 
-//		
-//		AdminFacade admin = getFacade(); 
-//		Gson gson = new Gson(); 
-//		
-//
-//		
-//		Company companyJason = gson.fromJson(jsonComString,Company.class);  
-//		
-//		if ( companyJason != null && admin.createCompany(companyJason) ) { 
-//			
-//			return Response.ok(200).entity("Created Company" + companyJason.getCompName()).build(); 
-//		}else { 
-//			return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).entity("Failed to Create Company" + companyJason.getCompName()).build(); 
-//		}
-//
-//	}
 
 	// Create new Company, used AdminFacade //
-	
+
 	@Path("createCompany")
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response createComapny(@QueryParam("name") String compName, @QueryParam("pass") String password,
 			@QueryParam("email") String email) throws Exception {
 
-	
 		AdminFacade admin = getFacade();
 		Company company = new Company(1111, compName, password, email);
-		
 
 		try {
 
 			if (admin.createCompany(company)) {
-				
+
 				String res = "SUCCEED TO ADD A NEW COMPANY: name = " + compName + ", id = " + company.getId();
-                String resJson = new Gson().toJson(res);
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
 
 			}
@@ -160,230 +133,303 @@ public class AdminService {
 			e.printStackTrace();
 		}
 
-		String res ="FAILED TO CREATE A COMPANY:  " + compName;
-        String resJson = new Gson().toJson(res);
+		String res = "FAILED TO CREATE A COMPANY:  " + compName;
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
 	}
-	
+
 	@POST
 	@Path("removeCompany")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response removeCompany(String jsonComString) throws Exception { 
+	public Response removeCompany(String jsonComString) throws Exception {
 
-		Gson gson = new Gson() ; 
-		Company compFromJson = gson.fromJson(jsonComString, Company.class); 
-		String compName = compFromJson.getCompName() ; 
-		
-		AdminFacade admin = getFacade(); 
+		Gson gson = new Gson();
+		Company compFromJson = gson.fromJson(jsonComString, Company.class);
+		String compName = compFromJson.getCompName();
+
+		AdminFacade admin = getFacade();
 		Company company = admin.getCompany(compName);
 		try {
-			
-            if (company != null ) { 
-            	admin.removeCompany(company); 
-            
-				String res =  "SUCCEED TO REMOVE A COMPANY: name = " + company.getCompName() ;
-                String resJson = new Gson().toJson(res);
+
+			if (company != null) {
+				admin.removeCompany(company);
+
+				String res = "SUCCEED TO REMOVE A COMPANY: name = " + company.getCompName();
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
-            	
-            }
+
+			}
 
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		String res = "FAILD TO REMOVE A COMPANY, THE COMPANY :" +  company.getCompName() + "no such a company " ;
-        String resJson = new Gson().toJson(res);
+
+		String res = "FAILD TO REMOVE A COMPANY, THE COMPANY :" + company.getCompName() + "no such a company ";
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-		
-				
-	} 
-	
-	@POST 
-	@Path ("updateCompany") 
+
+	}
+
+	@POST
+	@Path("updateCompany")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	
-	public Response updateComapny ( String jsonComString) throws Exception  {
-		
-		AdminFacade admin = getFacade() ; 
-		Gson gson = new Gson(); 
-		
-		Company compFromJson = gson.fromJson(jsonComString, Company.class); 
-		Company company = admin.getCompany(compFromJson.getCompName()); 
+
+	public Response updateComapny(String jsonComString) throws Exception {
+
+		AdminFacade admin = getFacade();
+		Gson gson = new Gson();
+
+		Company compFromJson = gson.fromJson(jsonComString, Company.class);
+		Company company = admin.getCompany(compFromJson.getCompName());
 		System.out.println(company);
 		try {
-			
-			if ( company != null ) { 
-				admin.updateCompany(company,compFromJson.getPassword(),compFromJson.getEmail()); 	
-				
-				String res = "SUCCEED TO UPDATE A COMPANY + " +  company.getCompName() +  "  : Password = " + compFromJson.getPassword() + " Email = " + compFromJson.getEmail() ;
-                String resJson = new Gson().toJson(res);
+
+			if (company != null) {
+				admin.updateCompany(company, compFromJson.getPassword(), compFromJson.getEmail());
+
+				String res = "SUCCEED TO UPDATE A COMPANY + " + company.getCompName() + "  : Password = "
+						+ compFromJson.getPassword() + " Email = " + compFromJson.getEmail();
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
 			}
-					
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		
+
 		String res = "FAILED TO UPDATE A COMPANY:" + company.getCompName();
-        String resJson = new Gson().toJson(res);
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-		
-		
-		
+
 	}
-	
+
 	@Path("createCustomer")
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response createCustomer(@QueryParam("name") String custName, @QueryParam("pass") String password) throws Exception {
-		
-		AdminFacade admin = getFacade(); 
-		Customer customer = new Customer(1111, custName, password); 
-		try {
-			
-			if (admin.createCustomer(customer)) {
-				
+	public Response createCustomer(@QueryParam("name") String custName, @QueryParam("pass") String password)
+			throws Exception {
 
-				String res ="SUCCEED TO ADD A NEW CUSTMER: name = " + custName ;	
-                String resJson = new Gson().toJson(res);
+		AdminFacade admin = getFacade();
+		Customer customer = new Customer(1111, custName, password);
+		try {
+
+			if (admin.createCustomer(customer)) {
+
+				String res = "SUCCEED TO ADD A NEW CUSTMER: name = " + custName;
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
-			}		
-			
+			}
+
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		
-		
 		String res = "FAILED TO CREATE A CUSTOMER: " + custName;
-        String resJson = new Gson().toJson(res);
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-	
+
 	}
 
 	@POST
 	@Path("removeCustomer")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	
-	public Response removeCustomer(String jsonCustString) throws Exception { 
 
-		AdminFacade admin = getFacade(); 
+	public Response removeCustomer(String jsonCustString) throws Exception {
+
+		AdminFacade admin = getFacade();
 		Gson gson = new Gson();
-		
-		Customer custFromJson = gson.fromJson(jsonCustString, Customer.class);
-		Customer customer = admin.getCustomer(custFromJson.getCustomerName()); 
 
-		
+		Customer custFromJson = gson.fromJson(jsonCustString, Customer.class);
+		Customer customer = admin.getCustomer(custFromJson.getCustomerName());
+
 		try {
-			
-            if (customer != null ) { 
-            	admin.removeCustomer(customer); 
-				String res ="SUCCEED TO REMOVE A CUSTOMER: name = " + customer.getCustomerName() ;		
-                String resJson = new Gson().toJson(res);
+
+			if (customer != null) {
+				admin.removeCustomer(customer);
+				String res = "SUCCEED TO REMOVE A CUSTOMER: name = " + customer.getCustomerName();
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
-            }
-			 
-			String res = "FAILED TO REMOVE A CUSTOMER:  please try again " ; 
-	        String resJson = new Gson().toJson(res);
+			}
+
+			String res = "FAILED TO REMOVE A CUSTOMER:  please try again ";
+			String resJson = new Gson().toJson(res);
 			return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		
-		String res = "FAILD TO REMOVE A CUSTOMER, THE  CUSTOMER :" +  customer.getCustomerName()+ "no such a customer "  ; 
-        String resJson = new Gson().toJson(res);
+
+		String res = "FAILD TO REMOVE A CUSTOMER, THE  CUSTOMER :" + customer.getCustomerName() + "no such a customer ";
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-				
-	} 
-	
-	@POST 
-	@Path ("updateCustomer") 
+
+	}
+
+	@POST
+	@Path("updateCustomer")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	
-	public Response updateCustomer ( String jsonCustString) throws Exception  {
-		
-		AdminFacade admin = getFacade() ; 
-		Gson gson = new Gson(); 
-		
-		Customer custFromJson = gson.fromJson(jsonCustString, Customer.class); 
+
+	public Response updateCustomer(String jsonCustString) throws Exception {
+
+		AdminFacade admin = getFacade();
+		Gson gson = new Gson();
+
+		Customer custFromJson = gson.fromJson(jsonCustString, Customer.class);
 		Customer customer = admin.getCustomer(custFromJson.getCustomerName());
-		
+
 		try {
-			
-			if ( customer.getCustomerName() != null ) { 
-				admin.updateCustomer(customer,custFromJson.getPassword()); 	
-				String res = "SUCCEED TO UPDATE A CUSTOMER " +  customer.getCustomerName() +  "  : Password = " + custFromJson.getPassword() ; 		
-                String resJson = new Gson().toJson(res);
+
+			if (customer.getCustomerName() != null) {
+				admin.updateCustomer(customer, custFromJson.getPassword());
+				String res = "SUCCEED TO UPDATE A CUSTOMER " + customer.getCustomerName() + "  : Password = "
+						+ custFromJson.getPassword();
+				String resJson = new Gson().toJson(res);
 				return Response.status(Response.Status.OK).entity(resJson).build();
 			}
-					
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		String res =  "FAILED TO UPDATE A CUSTOMER:" + customer.getCustomerName() ; 
-        String resJson = new Gson().toJson(res);
+
+		String res = "FAILED TO UPDATE A CUSTOMER:" + customer.getCustomerName();
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-		
-		
-		
+
 	}
-	
-	@GET 
-	@Path ("getCustomer/{custName}")
+
+	@GET
+	@Path("getCustomer/{custName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getCustomer (@PathParam("custName") String custName) throws Exception { 
-		
-		AdminFacade admin = getFacade() ; 
-		
-		try { 
-			
+	public String getCustomer(@PathParam("custName") String custName) throws Exception {
+
+		AdminFacade admin = getFacade();
+
+		try {
+
 			Customer customer = admin.getCustomer(custName);
-			if ( customer != null) { 
-				return new Gson().toJson(customer); 
+			if (customer != null) {
+				return new Gson().toJson(customer);
 			}
-			
-			
-		}catch ( Exception e ) { 
-			
+
+		} catch (Exception e) {
+
 		}
-		
-		return null ; 
-		
+
+		return null;
+
 	}
 
 	@Path("getAllCustomers")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAllCustomers() throws Exception {
-		
+
 		AdminFacade admin = getFacade();
 		try {
-			Collection<Customer> customers = admin.getAllCustomers(); 		
-            String resJson = new Gson().toJson(customers); 
+			Collection<Customer> customers = admin.getAllCustomers();
+			String resJson = new Gson().toJson(customers);
 			return Response.status(Response.Status.OK).entity(resJson).build();
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		
-		String res =  "FAILED TO RETURN ALL CUSTOMERS " ; 
-        String resJson = new Gson().toJson(res);
+
+		String res = "FAILED TO RETURN ALL CUSTOMERS ";
+		String resJson = new Gson().toJson(res);
 		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
-	
-		
+
 	}
+
+	@GET
+	@Path("viewIncomeByCompeny")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response viewIncomeByCompeny() throws Exception  { 
+			
+		
+		AdminFacade admin = getFacade(); 
+		List<Income> IncomeCompanies = new ArrayList<Income>(); 
+		Collection<Company> allCompnies = admin.getAllCompanies(); 
+		try { 
+			for (Company company : allCompnies) {
+				List<Income> income = businessDelegate.viewIncomeByCompany(company.getCompName());
+				if(income != null ) { 
+					IncomeCompanies.addAll(income);
+				}		
+			}
+			String resJson = new Gson().toJson(IncomeCompanies); 
+			return Response.status(Response.Status.OK).entity(resJson).build(); 
+		}catch (Exception e) {
+			e.getMessage();
+		}
+					
+	String res = "FAILED TO get the Company OutCome";
+	String resJson = new Gson().toJson(res);return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+
+	} 
+
+	@GET
+	@Path("viewIncomeByCustomer")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response viewIncomeByCustomer() throws Exception {
+
+        AdminFacade admin = getFacade(); 
+        List<Income> IncomeCustomer = new ArrayList<Income>(); 
+        Collection<Customer> allCustomers = admin.getAllCustomers(); 
+        
+
+		try {
+			
+			for (Customer customer : allCustomers) {
+				List<Income> income = businessDelegate.viewIncomeByCompany(customer.getCustomerName());
+				if ( income != null) { 
+					
+					IncomeCustomer.addAll(income); 
+				}	
+			}		
+			if (IncomeCustomer != null) {
+				String resJson = new Gson().toJson(IncomeCustomer);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		String res = "FAILED TO get the Company OutCome";
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+
+	}
+
+	@GET
+	@Path("viewAllIncome")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response viewAllIncome() throws Exception {
+
+		try {
+
+			List<Income> income = businessDelegate.viewAllIncome();
+
+			if (income != null) {
+				String resJson = new Gson().toJson(income);
+				return Response.status(Response.Status.OK).entity(resJson).build();
+			} else {
+				String res = "There are no Company OutCome";
+				String resJson = new Gson().toJson(res);
+				return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+		String res = "FAILED TO get the Company OutCome";
+		String resJson = new Gson().toJson(res);
+		return Response.status(Response.Status.BAD_REQUEST).entity(resJson).build();
+
+	}
+
 }
-
-
-
-
